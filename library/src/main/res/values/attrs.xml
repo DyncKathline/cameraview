@@ -18,6 +18,16 @@
           ratio of its camera preview.
         -->
         <attr name="android:adjustViewBounds"/>
+        <attr name="cameraType" format="enum">
+            <enum name="auto" value="0"/>
+            <enum name="camera1" value="1"/>
+            <enum name="camera2" value="2"/>
+        </attr>
+        <attr name="cameraPreview" format="enum">
+            <enum name="auto" value="0"/>
+            <enum name="surfaceView" value="1"/>
+            <enum name="textureView" value="2"/>
+        </attr>
         <!-- Direction the camera faces relative to device screen. -->
         <attr name="facing" format="enum">
             <!-- The camera device faces the opposite direction as the device's screen. -->

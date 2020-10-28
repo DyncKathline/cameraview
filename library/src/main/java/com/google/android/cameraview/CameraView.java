@@ -26,7 +26,9 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
+import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.widget.FrameLayout;
 
 import java.lang.annotation.Retention;
@@ -36,34 +38,64 @@ import java.util.Set;
 
 public class CameraView extends FrameLayout {
 
-    /** The camera device faces the opposite direction as the device's screen. */
-    public static final int FACING_BACK = Constants.FACING_BACK;
-
-    /** The camera device faces the same direction as the device's screen. */
-    public static final int FACING_FRONT = Constants.FACING_FRONT;
-
-    /** Direction the camera faces relative to device screen. */
-    @IntDef({FACING_BACK, FACING_FRONT})
+    /**
+     * Direction the camera faces relative to device screen.
+     */
+    @IntDef({Facing.FACING_BACK, Facing.FACING_FRONT})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Facing {
+        int FACING_BACK = Constants.FACING_BACK;
+        int FACING_FRONT = Constants.FACING_FRONT;
     }
 
-    /** Flash will not be fired. */
+    private int mCameraType;
+
+    @IntDef({CameraType.AUTO, CameraType.CAMERA1, CameraType.CAMERA2})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CameraType {
+        int AUTO = 0;
+        int CAMERA1 = 1;
+        int CAMERA2 = 2;
+    }
+
+    private int mCameraPreview;
+
+    @IntDef({CameraPreview.AUTO, CameraPreview.SURFACE_VIEW, CameraPreview.TEXTURE_VIEW})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CameraPreview {
+        int AUTO = 0;
+        int SURFACE_VIEW = 1;
+        int TEXTURE_VIEW = 2;
+    }
+
+    /**
+     * Flash will not be fired.
+     */
     public static final int FLASH_OFF = Constants.FLASH_OFF;
 
-    /** Flash will always be fired during snapshot. */
+    /**
+     * Flash will always be fired during snapshot.
+     */
     public static final int FLASH_ON = Constants.FLASH_ON;
 
-    /** Constant emission of light during preview, auto-focus and snapshot. */
+    /**
+     * Constant emission of light during preview, auto-focus and snapshot.
+     */
     public static final int FLASH_TORCH = Constants.FLASH_TORCH;
 
-    /** Flash will be fired automatically when required. */
+    /**
+     * Flash will be fired automatically when required.
+     */
     public static final int FLASH_AUTO = Constants.FLASH_AUTO;
 
-    /** Flash will be fired in red-eye reduction mode. */
+    /**
+     * Flash will be fired in red-eye reduction mode.
+     */
     public static final int FLASH_RED_EYE = Constants.FLASH_RED_EYE;
 
-    /** The mode for for the camera device's flash control */
+    /**
+     * The mode for for the camera device's flash control
+     */
     @IntDef({FLASH_OFF, FLASH_ON, FLASH_TORCH, FLASH_AUTO, FLASH_RED_EYE})
     public @interface Flash {
     }
@@ -92,25 +124,43 @@ public class CameraView extends FrameLayout {
             mDisplayOrientationDetector = null;
             return;
         }
+        // Attributes
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CameraView);
+        mAdjustViewBounds = a.getBoolean(R.styleable.CameraView_android_adjustViewBounds, false);
+        mCameraType = a.getInt(R.styleable.CameraView_cameraType, CameraType.AUTO);
+        mCameraPreview = a.getInt(R.styleable.CameraView_cameraPreview, CameraPreview.AUTO);
         // Internal setup
         final PreviewImpl preview = createPreviewImpl(context);
         mCallbacks = new CallbackBridge();
-        if (Build.VERSION.SDK_INT < 21) {
-            mImpl = new Camera1(mCallbacks, preview);
-        } else if (Build.VERSION.SDK_INT < 23) {
-            mImpl = new Camera2(mCallbacks, preview, context);
-        } else {
-            mImpl = new Camera2Api23(mCallbacks, preview, context);
+        switch (mCameraType) {
+            case CameraType.AUTO:
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    mImpl = new Camera1(mCallbacks, preview);
+                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                    mImpl = new Camera2(mCallbacks, preview, context);
+                } else {
+                    mImpl = new Camera2Api23(mCallbacks, preview, context);
+                }
+                break;
+            case CameraType.CAMERA1:
+                mImpl = new Camera1(mCallbacks, preview);
+                break;
+            case CameraType.CAMERA2:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    mImpl = new Camera2(mCallbacks, preview, context);
+                }else {
+                    mImpl = new Camera1(mCallbacks, preview);
+                }
+                break;
         }
-        // Attributes
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CameraView, defStyleAttr,
-                R.style.Widget_CameraView);
-        mAdjustViewBounds = a.getBoolean(R.styleable.CameraView_android_adjustViewBounds, false);
-        setFacing(a.getInt(R.styleable.CameraView_facing, FACING_BACK));
+        int facing = a.getInt(R.styleable.CameraView_facing, Facing.FACING_BACK);
+        setFacing(facing);
         String aspectRatio = a.getString(R.styleable.CameraView_aspectRatio);
-        if (aspectRatio != null) {
+        if (aspectRatio != null && !TextUtils.isEmpty(aspectRatio)) {
             setAspectRatio(AspectRatio.parse(aspectRatio));
         } else {
+//            DisplayMetrics dm = getResources().getDisplayMetrics();
+//            setAspectRatio(AspectRatio.of(dm.heightPixels, dm.widthPixels));
             setAspectRatio(Constants.DEFAULT_ASPECT_RATIO);
         }
         setAutoFocus(a.getBoolean(R.styleable.CameraView_autoFocus, true));
@@ -128,10 +178,20 @@ public class CameraView extends FrameLayout {
     @NonNull
     private PreviewImpl createPreviewImpl(Context context) {
         PreviewImpl preview;
-        if (Build.VERSION.SDK_INT >= 23) {
-            preview = new SurfaceViewPreview(context, this);
-        } else {
-            preview = new TextureViewPreview(context, this);
+        switch (mCameraPreview) {
+            case CameraPreview.SURFACE_VIEW:
+                preview = new SurfaceViewPreview(context, this);
+                break;
+            case CameraPreview.TEXTURE_VIEW:
+                preview = new TextureViewPreview(context, this);
+                break;
+            case CameraPreview.AUTO:
+            default:
+                if (Build.VERSION.SDK_INT >= 23) {
+                    preview = new SurfaceViewPreview(context, this);
+                } else {
+                    preview = new TextureViewPreview(context, this);
+                }
         }
         return preview;
     }
@@ -192,24 +252,24 @@ public class CameraView extends FrameLayout {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
         // Measure the TextureView
-        int width = getMeasuredWidth();
-        int height = getMeasuredHeight();
-        AspectRatio ratio = getAspectRatio();
-        if (mDisplayOrientationDetector.getLastKnownDisplayOrientation() % 180 == 0) {
-            ratio = ratio.inverse();
-        }
-        assert ratio != null;
-        if (height < width * ratio.getY() / ratio.getX()) {
-            mImpl.getView().measure(
-                    MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(width * ratio.getY() / ratio.getX(),
-                            MeasureSpec.EXACTLY));
-        } else {
-            mImpl.getView().measure(
-                    MeasureSpec.makeMeasureSpec(height * ratio.getX() / ratio.getY(),
-                            MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-        }
+//        int width = getMeasuredWidth();
+//        int height = getMeasuredHeight();
+//        AspectRatio ratio = getAspectRatio();
+//        if (mDisplayOrientationDetector.getLastKnownDisplayOrientation() % 180 == 0) {
+//            ratio = ratio.inverse();
+//        }
+//        assert ratio != null;
+//        if (height < width * ratio.getY() / ratio.getX()) {
+//            mImpl.getView().measure(
+//                    MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+//                    MeasureSpec.makeMeasureSpec(width * ratio.getY() / ratio.getX(),
+//                            MeasureSpec.EXACTLY));
+//        } else {
+//            mImpl.getView().measure(
+//                    MeasureSpec.makeMeasureSpec(height * ratio.getX() / ratio.getY(),
+//                            MeasureSpec.EXACTLY),
+//                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+//        }
     }
 
     @Override
@@ -237,8 +297,8 @@ public class CameraView extends FrameLayout {
     }
 
     /**
-     * Open a camera device and start showing camera preview. This is typically called from
-     * {@link Activity#onResume()}.
+     * Open a camera device and start showing camera preview. This is typically called from {@link
+     * Activity#onResume()}.
      */
     public void start() {
         if (!mImpl.start()) {
@@ -252,8 +312,8 @@ public class CameraView extends FrameLayout {
     }
 
     /**
-     * Stop camera preview and close the device. This is typically called from
-     * {@link Activity#onPause()}.
+     * Stop camera preview and close the device. This is typically called from {@link
+     * Activity#onPause()}.
      */
     public void stop() {
         mImpl.stop();
@@ -310,8 +370,8 @@ public class CameraView extends FrameLayout {
     /**
      * Chooses camera by the direction it faces.
      *
-     * @param facing The camera facing. Must be either {@link #FACING_BACK} or
-     *               {@link #FACING_FRONT}.
+     * @param facing The camera facing. Must be either {@link Facing#FACING_BACK} or {@link
+     *               Facing#FACING_FRONT}.
      */
     public void setFacing(@Facing int facing) {
         mImpl.setFacing(facing);
@@ -360,8 +420,8 @@ public class CameraView extends FrameLayout {
      * Enables or disables the continuous auto-focus mode. When the current camera doesn't support
      * auto-focus, calling this method will be ignored.
      *
-     * @param autoFocus {@code true} to enable continuous auto-focus mode. {@code false} to
-     *                  disable it.
+     * @param autoFocus {@code true} to enable continuous auto-focus mode. {@code false} to disable
+     *                  it.
      */
     public void setAutoFocus(boolean autoFocus) {
         mImpl.setAutoFocus(autoFocus);
@@ -398,8 +458,8 @@ public class CameraView extends FrameLayout {
     }
 
     /**
-     * Take a picture. The result will be returned to
-     * {@link Callback#onPictureTaken(CameraView, byte[])}.
+     * Take a picture. The result will be returned to {@link Callback#onPictureTaken(CameraView,
+     * byte[])}.
      */
     public void takePicture() {
         mImpl.takePicture();

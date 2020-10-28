@@ -32,6 +32,10 @@ public class AspectRatio implements Comparable<AspectRatio>, Parcelable {
     private final int mX;
     private final int mY;
 
+    public static AspectRatio of(@NonNull Size size) {
+        return new AspectRatio(size.getWidth(), size.getHeight());
+    }
+
     /**
      * Returns an instance of {@link AspectRatio} specified by {@code x} and {@code y} values.
      * The values {@code x} and {@code} will be reduced by their greatest common divider.
@@ -85,6 +89,11 @@ public class AspectRatio implements Comparable<AspectRatio>, Parcelable {
     private AspectRatio(int x, int y) {
         mX = x;
         mY = y;
+    }
+
+    public double ratio() {
+        double ratio = (double) mY / mX;
+        return ratio;
     }
 
     public int getX() {

@@ -44,7 +44,7 @@ abstract class CameraViewImpl {
 
     abstract boolean isCameraOpened();
 
-    abstract void setFacing(int facing);
+    abstract void setFacing(@CameraView.Facing int facing);
 
     abstract int getFacing();
 

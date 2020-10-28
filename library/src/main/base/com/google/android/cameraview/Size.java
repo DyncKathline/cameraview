@@ -16,7 +16,11 @@
 
 package com.google.android.cameraview;
 
+import android.hardware.Camera;
 import android.support.annotation.NonNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Immutable class for describing width and height dimensions in pixels.
@@ -43,6 +47,40 @@ public class Size implements Comparable<Size> {
 
     public int getHeight() {
         return mHeight;
+    }
+
+    /**
+     * Get sizes from {@link Camera.Size} for camera1.
+     *
+     * @param cameraSizes the camera sizes support of camera1
+     * @return            the standard size
+     */
+    public static List<Size> fromList(@NonNull List<Camera.Size> cameraSizes) {
+        List<Size> sizes = new ArrayList<>(cameraSizes.size());
+        for (Camera.Size size : cameraSizes) {
+            sizes.add(new Size(size.width, size.height));
+        }
+        return sizes;
+    }
+
+    /**
+     * The area of current size, calculated only when necessary.
+     *
+     * @return the area of size.
+     */
+    public int area() {
+        int area = mWidth * mHeight;
+        return area;
+    }
+
+    /**
+     * The ratio of current size, calculated only when necessary.
+     *
+     * @return the ratio
+     */
+    public double ratio() {
+        double ratio = (double) mHeight / mWidth;
+        return ratio;
     }
 
     @Override

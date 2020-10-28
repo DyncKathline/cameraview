@@ -32,8 +32,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @SuppressWarnings("deprecation")
 class Camera1 extends CameraViewImpl {
 
-    private static final int INVALID_CAMERA_ID = -1;
-
     private static final SparseArrayCompat<String> FLASH_MODES = new SparseArrayCompat<>();
 
     static {
@@ -43,6 +41,10 @@ class Camera1 extends CameraViewImpl {
         FLASH_MODES.put(Constants.FLASH_AUTO, Camera.Parameters.FLASH_MODE_AUTO);
         FLASH_MODES.put(Constants.FLASH_RED_EYE, Camera.Parameters.FLASH_MODE_RED_EYE);
     }
+
+    private int mFrontCameraId = -1;
+
+    private int mBackCameraId = -1;
 
     private int mCameraId;
 
@@ -64,7 +66,8 @@ class Camera1 extends CameraViewImpl {
 
     private boolean mAutoFocus;
 
-    private int mFacing;
+    private @CameraView.Facing
+    int mFacing;
 
     private int mFlash;
 
@@ -72,6 +75,7 @@ class Camera1 extends CameraViewImpl {
 
     Camera1(Callback callback, PreviewImpl preview) {
         super(callback, preview);
+        chooseCamera();
         preview.setCallback(new PreviewImpl.Callback() {
             @Override
             public void onSurfaceChanged() {
@@ -85,7 +89,6 @@ class Camera1 extends CameraViewImpl {
 
     @Override
     boolean start() {
-        chooseCamera();
         openCamera();
         if (mPreview.isReady()) {
             setUpPreview();
@@ -128,6 +131,11 @@ class Camera1 extends CameraViewImpl {
         if (mFacing == facing) {
             return;
         }
+        int numberOfCameras = Camera.getNumberOfCameras();// 获取摄像头个数
+        if (numberOfCameras == 1) {
+            return;
+        }
+        mCameraId = switchCameraId();
         mFacing = facing;
         if (isCameraOpened()) {
             stop();
@@ -142,13 +150,8 @@ class Camera1 extends CameraViewImpl {
 
     @Override
     Set<AspectRatio> getSupportedAspectRatios() {
-        SizeMap idealAspectRatios = mPreviewSizes;
-        for (AspectRatio aspectRatio : idealAspectRatios.ratios()) {
-            if (mPictureSizes.sizes(aspectRatio) == null) {
-                idealAspectRatios.remove(aspectRatio);
-            }
-        }
-        return idealAspectRatios.ratios();
+        mPreviewSizes.ratios().retainAll(mPictureSizes.ratios());
+        return mPreviewSizes.ratios();
     }
 
     @Override
@@ -256,17 +259,64 @@ class Camera1 extends CameraViewImpl {
     }
 
     /**
+     * 判断是否有后置摄像头。
+     *
+     * @return true 代表有后置摄像头
+     */
+    private boolean hasBackCamera() {
+        return mBackCameraId != -1;
+    }
+
+    /**
+     * 判断是否有前置摄像头。
+     *
+     * @return true 代表有前置摄像头
+     */
+    private boolean hasFrontCamera() {
+        return mFrontCameraId != -1;
+    }
+
+    /**
+     * 获取要开启的相机 ID，优先开启后置。
+     */
+    private int getCameraId() {
+        if (hasBackCamera()) {
+            return mBackCameraId;
+        } else if (hasFrontCamera()) {
+            return mFrontCameraId;
+        } else  {
+            throw new RuntimeException("No available camera id found.");
+        }
+    }
+
+    /**
+     * 切换前后置时切换ID
+     */
+    private int switchCameraId() {
+        if (mCameraId == mFrontCameraId && hasBackCamera()) {
+            return mBackCameraId;
+        } else if (mCameraId == mBackCameraId && hasFrontCamera()) {
+            return mFrontCameraId;
+        } else {
+            throw new RuntimeException("No available camera id to switch.");
+        }
+    }
+
+    /**
      * This rewrites {@link #mCameraId} and {@link #mCameraInfo}.
      */
     private void chooseCamera() {
         for (int i = 0, count = Camera.getNumberOfCameras(); i < count; i++) {
             Camera.getCameraInfo(i, mCameraInfo);
-            if (mCameraInfo.facing == mFacing) {
-                mCameraId = i;
-                return;
+            if (mCameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                // 后置摄像头信息
+                mBackCameraId = i;
+            } else if (mCameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                // 前置摄像头信息
+                mFrontCameraId = i;
             }
         }
-        mCameraId = INVALID_CAMERA_ID;
+        mCameraId = getCameraId();
     }
 
     private void openCamera() {

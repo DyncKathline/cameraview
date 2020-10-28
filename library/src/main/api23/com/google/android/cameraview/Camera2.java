@@ -16,9 +16,10 @@
 
 package com.google.android.cameraview;
 
-import android.annotation.TargetApi;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.ImageFormat;
+import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -31,6 +32,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.Surface;
@@ -40,8 +42,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.SortedSet;
 
-@SuppressWarnings("MissingPermission")
-@TargetApi(21)
+@SuppressLint("MissingPermission")
+@RequiresApi(21)
 class Camera2 extends CameraViewImpl {
 
     private static final String TAG = "Camera2";
@@ -244,6 +246,10 @@ class Camera2 extends CameraViewImpl {
         if (mFacing == facing) {
             return;
         }
+        int numberOfCameras = Camera.getNumberOfCameras();// 获取摄像头个数
+        if (numberOfCameras == 1) {
+            return;
+        }
         mFacing = facing;
         if (isCameraOpened()) {
             stop();
@@ -258,6 +264,7 @@ class Camera2 extends CameraViewImpl {
 
     @Override
     Set<AspectRatio> getSupportedAspectRatios() {
+        mPreviewSizes.ratios().retainAll(mPictureSizes.ratios());
         return mPreviewSizes.ratios();
     }
 
