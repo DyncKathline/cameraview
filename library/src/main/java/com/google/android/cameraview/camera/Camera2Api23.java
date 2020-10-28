@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package com.google.android.cameraview;
+package com.google.android.cameraview.camera;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.params.StreamConfigurationMap;
 
+import com.google.android.cameraview.preview.PreviewImpl;
+import com.google.android.cameraview.size.Size;
+import com.google.android.cameraview.size.SizeMap;
+
 
 @TargetApi(23)
-class Camera2Api23 extends Camera2 {
+public class Camera2Api23 extends Camera2 {
 
-    Camera2Api23(Callback callback, PreviewImpl preview, Context context) {
+    public Camera2Api23(Callback callback, PreviewImpl preview, Context context) {
         super(callback, preview, context);
     }
 

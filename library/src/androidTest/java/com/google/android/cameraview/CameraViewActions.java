@@ -23,6 +23,8 @@ import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.view.View;
 
+import com.google.android.cameraview.size.AspectRatio;
+
 import org.hamcrest.Matcher;
 
 class CameraViewActions {

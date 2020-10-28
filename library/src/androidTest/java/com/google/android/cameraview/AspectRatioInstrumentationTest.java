@@ -25,6 +25,8 @@ import static org.hamcrest.core.Is.is;
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.google.android.cameraview.size.AspectRatio;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

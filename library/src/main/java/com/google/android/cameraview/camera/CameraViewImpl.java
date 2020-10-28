@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package com.google.android.cameraview;
+package com.google.android.cameraview.camera;
 
 import android.view.View;
 
+import com.google.android.cameraview.CameraView;
+import com.google.android.cameraview.preview.PreviewImpl;
+import com.google.android.cameraview.size.AspectRatio;
+
 import java.util.Set;
 
-abstract class CameraViewImpl {
+public abstract class CameraViewImpl {
 
     protected final Callback mCallback;
 
@@ -38,38 +42,38 @@ abstract class CameraViewImpl {
     /**
      * @return {@code true} if the implementation was able to start the camera session.
      */
-    abstract boolean start();
+    public abstract boolean start();
 
-    abstract void stop();
+    public abstract void stop();
 
-    abstract boolean isCameraOpened();
+    public abstract boolean isCameraOpened();
 
-    abstract void setFacing(@CameraView.Facing int facing);
+    public abstract void setFacing(@CameraView.Facing int facing);
 
-    abstract int getFacing();
+    public abstract int getFacing();
 
-    abstract Set<AspectRatio> getSupportedAspectRatios();
+    public abstract Set<AspectRatio> getSupportedAspectRatios();
 
     /**
      * @return {@code true} if the aspect ratio was changed.
      */
-    abstract boolean setAspectRatio(AspectRatio ratio);
+    public abstract boolean setAspectRatio(AspectRatio ratio);
 
-    abstract AspectRatio getAspectRatio();
+    public abstract AspectRatio getAspectRatio();
 
-    abstract void setAutoFocus(boolean autoFocus);
+    public abstract void setAutoFocus(boolean autoFocus);
 
-    abstract boolean getAutoFocus();
+    public abstract boolean getAutoFocus();
 
-    abstract void setFlash(int flash);
+    public abstract void setFlash(int flash);
 
-    abstract int getFlash();
+    public abstract int getFlash();
 
-    abstract void takePicture();
+    public abstract void takePicture();
 
-    abstract void setDisplayOrientation(int displayOrientation);
+    public abstract void setDisplayOrientation(int displayOrientation);
 
-    interface Callback {
+    public interface Callback {
 
         void onCameraOpened();
 

@@ -19,6 +19,10 @@ package com.google.android.cameraview;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.google.android.cameraview.size.AspectRatio;
+import com.google.android.cameraview.size.Size;
+import com.google.android.cameraview.size.SizeMap;
+
 import org.junit.Test;
 
 public class SizeMapTest {

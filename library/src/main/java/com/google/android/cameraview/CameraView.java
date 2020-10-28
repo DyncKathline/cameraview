@@ -28,8 +28,16 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.widget.FrameLayout;
+
+import com.google.android.cameraview.camera.Camera1;
+import com.google.android.cameraview.camera.Camera2;
+import com.google.android.cameraview.camera.Camera2Api23;
+import com.google.android.cameraview.camera.CameraViewImpl;
+import com.google.android.cameraview.preview.PreviewImpl;
+import com.google.android.cameraview.preview.SurfaceViewPreview;
+import com.google.android.cameraview.preview.TextureViewPreview;
+import com.google.android.cameraview.size.AspectRatio;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

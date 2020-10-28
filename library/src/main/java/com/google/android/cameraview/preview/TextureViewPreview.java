@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.cameraview;
+package com.google.android.cameraview.preview;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -26,13 +26,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 @TargetApi(14)
-class TextureViewPreview extends PreviewImpl {
+public class TextureViewPreview extends PreviewImpl {
 
     private final TextureView mTextureView;
 
     private int mDisplayOrientation;
 
-    TextureViewPreview(Context context, ViewGroup parent) {
+    public TextureViewPreview(Context context, ViewGroup parent) {
 //        final View view = View.inflate(context, R.layout.texture_view, parent);
         mTextureView = new TextureView(context);
         parent.addView(mTextureView);
@@ -67,38 +67,38 @@ class TextureViewPreview extends PreviewImpl {
     // This method is called only from Camera2.
     @TargetApi(15)
     @Override
-    void setBufferSize(int width, int height) {
+    public void setBufferSize(int width, int height) {
         mTextureView.getSurfaceTexture().setDefaultBufferSize(width, height);
     }
 
     @Override
-    Surface getSurface() {
+    public Surface getSurface() {
         return new Surface(mTextureView.getSurfaceTexture());
     }
 
     @Override
-    SurfaceTexture getSurfaceTexture() {
+    public SurfaceTexture getSurfaceTexture() {
         return mTextureView.getSurfaceTexture();
     }
 
     @Override
-    View getView() {
+    public View getView() {
         return mTextureView;
     }
 
     @Override
-    Class getOutputClass() {
+    public Class getOutputClass() {
         return SurfaceTexture.class;
     }
 
     @Override
-    void setDisplayOrientation(int displayOrientation) {
+    public void setDisplayOrientation(int displayOrientation) {
         mDisplayOrientation = displayOrientation;
         configureTransform();
     }
 
     @Override
-    boolean isReady() {
+    public boolean isReady() {
         return mTextureView.getSurfaceTexture() != null;
     }
 

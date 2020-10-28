@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package com.google.android.cameraview;
+package com.google.android.cameraview.preview;
 
 import android.content.Context;
-import android.support.v4.view.ViewCompat;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 
-class SurfaceViewPreview extends PreviewImpl {
+public class SurfaceViewPreview extends PreviewImpl {
 
     final SurfaceView mSurfaceView;
 
-    SurfaceViewPreview(Context context, ViewGroup parent) {
+    public SurfaceViewPreview(Context context, ViewGroup parent) {
 //        final View view = View.inflate(context, R.layout.surface_view, parent);
         mSurfaceView = new SurfaceView(context);
         parent.addView(mSurfaceView);
@@ -54,31 +53,31 @@ class SurfaceViewPreview extends PreviewImpl {
     }
 
     @Override
-    Surface getSurface() {
+    public Surface getSurface() {
         return getSurfaceHolder().getSurface();
     }
 
     @Override
-    SurfaceHolder getSurfaceHolder() {
+    public SurfaceHolder getSurfaceHolder() {
         return mSurfaceView.getHolder();
     }
 
     @Override
-    View getView() {
+    public View getView() {
         return mSurfaceView;
     }
 
     @Override
-    Class getOutputClass() {
+    public Class getOutputClass() {
         return SurfaceHolder.class;
     }
 
     @Override
-    void setDisplayOrientation(int displayOrientation) {
+    public void setDisplayOrientation(int displayOrientation) {
     }
 
     @Override
-    boolean isReady() {
+    public boolean isReady() {
         return getWidth() != 0 && getHeight() != 0;
     }
 

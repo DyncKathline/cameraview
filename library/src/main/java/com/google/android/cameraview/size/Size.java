@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.android.cameraview;
+package com.google.android.cameraview.size;
 
 import android.hardware.Camera;
 import android.support.annotation.NonNull;

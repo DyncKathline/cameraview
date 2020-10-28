@@ -18,6 +18,8 @@ package com.google.android.cameraview;
 
 import static org.hamcrest.CoreMatchers.either;
 
+import com.google.android.cameraview.size.AspectRatio;
+
 import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;

@@ -42,7 +42,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.cameraview.AspectRatio;
+import com.google.android.cameraview.size.AspectRatio;
 import com.google.android.cameraview.CameraView;
 
 import java.io.File;

@@ -19,6 +19,8 @@ package com.google.android.cameraview;
 import android.support.annotation.NonNull;
 import android.view.View;
 
+import com.google.android.cameraview.size.AspectRatio;
+
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;

@@ -19,6 +19,8 @@ package com.google.android.cameraview;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.google.android.cameraview.size.Size;
+
 import org.junit.Test;
 
 import java.util.HashSet;

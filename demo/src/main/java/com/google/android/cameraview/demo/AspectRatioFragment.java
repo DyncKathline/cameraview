@@ -29,7 +29,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.google.android.cameraview.AspectRatio;
+import com.google.android.cameraview.size.AspectRatio;
 
 import java.util.Arrays;
 import java.util.Set;
