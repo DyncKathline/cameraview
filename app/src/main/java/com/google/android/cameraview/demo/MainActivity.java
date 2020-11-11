@@ -18,13 +18,17 @@ package com.google.android.cameraview.demo;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.design.widget.FloatingActionButton;
@@ -255,13 +259,24 @@ public class MainActivity extends AppCompatActivity implements
             getBackgroundHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                            "picture.jpg");
+                    String SDCardPath = Environment.getExternalStorageDirectory().getPath() + File.separator;
+                    String filePath = SDCardPath + Environment.DIRECTORY_DCIM + File.separator + "Camera" + File.separator;
+                    String fileName = "picture.jpg";
+                    File file = new File(filePath,
+                            fileName);
                     OutputStream os = null;
                     try {
                         os = new FileOutputStream(file);
                         os.write(data);
                         os.close();
+
+                        ContentValues values = new ContentValues();
+                        values.put(MediaStore.Images.Media.DATA, file.getAbsolutePath());
+                        values.put(MediaStore.Images.Media.MIME_TYPE, getPhotoMimeType(fileName));
+                        Uri insert = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                        intent.setData(insert);
+                        sendBroadcast(intent);
                     } catch (IOException e) {
                         Log.w(TAG, "Cannot write to " + file, e);
                     } finally {
@@ -278,6 +293,24 @@ public class MainActivity extends AppCompatActivity implements
         }
 
     };
+
+    /**
+     * 获取照片的mine_type
+     *
+     * @param path
+     * @return
+     */
+    private static String getPhotoMimeType(String path) {
+        String lowerPath = path.toLowerCase();
+        if (lowerPath.endsWith("jpg") || lowerPath.endsWith("jpeg")) {
+            return "image/jpeg";
+        } else if (lowerPath.endsWith("png")) {
+            return "image/png";
+        } else if (lowerPath.endsWith("gif")) {
+            return "image/gif";
+        }
+        return "image/jpeg";
+    }
 
     public static class ConfirmationDialogFragment extends DialogFragment {
 
