@@ -33,7 +33,7 @@
         app:autoFocus="true"
         app:flash="auto"
         app:aspectRatio=""
-        app:cameraType="camera1"
+        app:cameraType="camera2"
         app:cameraPreview="textureView"
         android:background="@android:color/black"/>
 

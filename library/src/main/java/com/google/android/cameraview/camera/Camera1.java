@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -363,6 +364,13 @@ public class Camera1 extends CameraViewImpl {
     }
 
     void adjustCameraParameters() {
+        if(mAspectRatio.ratio() == 0) {
+            mPreviewSizes.ratios().retainAll(mPictureSizes.ratios());
+            Set<AspectRatio> ratios = mPreviewSizes.ratios();
+            SortedSet<AspectRatio> sortedSet = new TreeSet<>();
+            sortedSet.addAll(ratios);
+            mAspectRatio = sortedSet.last();
+        }
         SortedSet<Size> sizes = mPreviewSizes.sizes(mAspectRatio);
         if (sizes == null) { // Not supported
             mAspectRatio = chooseAspectRatio();

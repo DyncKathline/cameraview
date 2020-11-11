@@ -167,9 +167,7 @@ public class CameraView extends FrameLayout {
         if (aspectRatio != null && !TextUtils.isEmpty(aspectRatio)) {
             setAspectRatio(AspectRatio.parse(aspectRatio));
         } else {
-//            DisplayMetrics dm = getResources().getDisplayMetrics();
-//            setAspectRatio(AspectRatio.of(dm.heightPixels, dm.widthPixels));
-            setAspectRatio(Constants.DEFAULT_ASPECT_RATIO);
+            setAspectRatio(AspectRatio.parse("1:0"));
         }
         setAutoFocus(a.getBoolean(R.styleable.CameraView_autoFocus, true));
         setFlash(a.getInt(R.styleable.CameraView_flash, Constants.FLASH_AUTO));

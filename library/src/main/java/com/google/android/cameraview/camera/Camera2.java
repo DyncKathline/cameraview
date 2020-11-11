@@ -47,6 +47,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 @SuppressLint("MissingPermission")
 @RequiresApi(21)
@@ -276,17 +277,15 @@ public class Camera2 extends CameraViewImpl {
 
     @Override
     public boolean setAspectRatio(AspectRatio ratio) {
-        if (ratio == null || ratio.equals(mAspectRatio) ||
-                !mPreviewSizes.ratios().contains(ratio)) {
+        if (ratio == null || ratio.equals(mAspectRatio)) {
             // TODO: Better error handling
             return false;
         }
         mAspectRatio = ratio;
-        prepareImageReader();
         if (mCaptureSession != null) {
             mCaptureSession.close();
             mCaptureSession = null;
-            startCaptureSession();
+//            startCaptureSession();
         }
         return true;
     }
@@ -445,8 +444,15 @@ public class Camera2 extends CameraViewImpl {
             }
         }
 
-        if (!mPreviewSizes.ratios().contains(mAspectRatio)) {
-            mAspectRatio = mPreviewSizes.ratios().iterator().next();
+//        if (!mPreviewSizes.ratios().contains(mAspectRatio)) {
+//            mAspectRatio = mPreviewSizes.ratios().iterator().next();
+//        }
+        if(mAspectRatio.ratio() == 0) {
+            mPreviewSizes.ratios().retainAll(mPictureSizes.ratios());
+            Set<AspectRatio> ratios = mPreviewSizes.ratios();
+            SortedSet<AspectRatio> sortedSet = new TreeSet<>();
+            sortedSet.addAll(ratios);
+            mAspectRatio = sortedSet.last();
         }
     }
 
@@ -488,6 +494,7 @@ public class Camera2 extends CameraViewImpl {
             return;
         }
         Size previewSize = chooseOptimalSize();
+        prepareImageReader();
         mPreview.setBufferSize(previewSize.getWidth(), previewSize.getHeight());
         Surface surface = mPreview.getSurface();
         try {
